@@ -1,0 +1,44 @@
+install.packages("devtools")
+library(devtools)
+install_github("AtlasOfLivingAustralia/ALA4R")
+
+setwd("C:\\Users\\Nathan\\Documents\\R\\R documents\\R codes")
+
+
+library(ALA4R)
+library(ggplot2)
+library(maps)
+library(maptools)
+library(knitr)
+
+# Search for Dendrolagus (genus of Tree Kangaroo)
+search=search_fulltext("Dendrolagus")
+
+# Download occurrences
+TreeKangaroo=occurrences(taxon="Dendrolagus", download_reason_id=10)
+
+# Save as data.frame
+TreeKangaroo<-as.data.frame(TreeKangaroo$data)
+
+# Search for Dendrolagus (genus of Tree Kangaroo)
+dendro<-data.frame(TreeKangaroo$scientificName,
+                   TreeKangaroo$latitude,
+                   TreeKangaroo$longitude)
+# Quick check
+head(dendro)
+
+# Simplify column names
+colnames(dendro)<- c("species","latitude","longitude")
+
+# Remove rows with missing values (NAs)
+dendro<-na.omit(dendro)
+
+# Save new dataframe
+write.csv(dendro,"dendro.csv")
+
+#Using ggplot, plot the Base World Map
+mapWorld <- borders("world", colour="gray50", fill="gray50") # create a layer of borders
+
+ggplot() + mapWorld +
+coord_equal(xlim = c(128, 154),ylim = c(-25, 5))+
+geom_point(data=dendro, aes(x=longitude, y=latitude,colour=species))
